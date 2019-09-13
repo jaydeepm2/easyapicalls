@@ -2,8 +2,6 @@ package com.jaydeepm2.easyapicall;
 
 import android.content.Context;
 
-import com.android.volley.VolleyError;
-
 import org.json.JSONException;
 
 import java.util.Map;
@@ -58,8 +56,9 @@ public class EasyApiCalls implements RequestApp{
             }
 
             @Override
-            public void onFail(VolleyError error) {
-                onCallBack.onFail(error);
+            public void onFail(String msg) {
+
+                onCallBack.onFail(msg);
 
             }
         });

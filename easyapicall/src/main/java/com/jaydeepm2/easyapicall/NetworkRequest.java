@@ -4,7 +4,12 @@ import android.content.Context;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
@@ -42,8 +47,23 @@ public class NetworkRequest {
                         public void onErrorResponse(VolleyError error) {
 
                             NetworkUtility.HideLoading();
-
-                            onCallBack.onFail(error);
+                            String msg = "";
+                            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                                msg = "Timeout or No Connection Error.";
+                            } else if (error instanceof AuthFailureError) {
+                                //TODO
+                                msg = "Authentication Failure Error.";
+                            } else if (error instanceof ServerError) {
+                                //TODO
+                                msg = "Server Error.";
+                            } else if (error instanceof NetworkError) {
+                                //TODO
+                                msg = "Network Error.";
+                            } else if (error instanceof ParseError) {
+                                //TODO
+                                msg = "Data Error.";
+                            }
+                            onCallBack.onFail(msg);
                         }
                     })
             {
@@ -76,7 +96,7 @@ public class NetworkRequest {
     public interface GetResponse {
         void onSuccess(String result) throws JSONException;
 
-        void onFail(VolleyError error);
+        void onFail(String msg);
     }
 
 }
