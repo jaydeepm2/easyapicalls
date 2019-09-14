@@ -14,8 +14,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,78 +25,98 @@ public class NetworkRequest {
 
 
 
-    public static void Request(final Context context, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final GetResponse onCallBack) {
+    public static void Request(final Context context, final boolean showProgressDialog, String progressMessage, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final String StatusKeyName, final Map<String, String> status_codes, final GetResponse onCallBack) {
 
-        if (NetworkUtility.isNetworkAvailable(context)) {
+        try {
+            if (NetworkUtility.isNetworkAvailable(context)) {
 
-            NetworkUtility.OpenLoadingDialog(context, "");
-
-            StringRequest stringRequest = new StringRequest(methodType, url, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-
-                    NetworkUtility.HideLoading();
-
-                    try {
-                        onCallBack.onSuccess(response.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                if (showProgressDialog) {
+                    NetworkUtility.OpenLoadingDialog(context, progressMessage);
                 }
-            },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
 
+                StringRequest stringRequest = new StringRequest(methodType, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        if (showProgressDialog) {
                             NetworkUtility.HideLoading();
-                            String msg = "";
-                            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                                msg = "Timeout or No Connection Error.";
-                            } else if (error instanceof AuthFailureError) {
-                                //TODO
-                                msg = "Authentication Failure Error.";
-                            } else if (error instanceof ServerError) {
-                                //TODO
-                                msg = "Server Error.";
-                            } else if (error instanceof NetworkError) {
-                                //TODO
-                                msg = "Network Error.";
-                            } else if (error instanceof ParseError) {
-                                //TODO
-                                msg = "Data Error.";
-                            }
-                            onCallBack.onFail(msg);
                         }
-                    })
-            {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> paramsFinal = new HashMap<>();
-                    if (Objects.requireNonNull(params) != null){
-                        paramsFinal = params;
-                    }
-                    return paramsFinal;
-                }
 
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headersFinal = new HashMap<>();
-                    if (Objects.requireNonNull(headers) != null){
-                        headersFinal = headers;
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            Iterator it = status_codes.entrySet().iterator();
+                            String return_status_code = null;
+                            while (it.hasNext()) {
+                                Map.Entry pair = (Map.Entry) it.next();
+                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
+                                    return_status_code = pair.getValue().toString();
+                                    break;
+                                }
+                            }
+                            onCallBack.onSuccess(return_status_code, obj);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    return headersFinal;
-                }
-            };
+                },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
 
-            stringRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
-        } else {
-            NetworkUtility.Toast(context, "Please check your internet connection");
+                                if (showProgressDialog) {
+                                    NetworkUtility.HideLoading();
+                                }
+                                String msg = "";
+                                if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                                    msg = "Timeout or No Connection Error.";
+                                } else if (error instanceof AuthFailureError) {
+                                    //TODO
+                                    msg = "Authentication Failure Error.";
+                                } else if (error instanceof ServerError) {
+                                    //TODO
+                                    msg = "Server Error.";
+                                } else if (error instanceof NetworkError) {
+                                    //TODO
+                                    msg = "Network Error.";
+                                } else if (error instanceof ParseError) {
+                                    //TODO
+                                    msg = "Data Error.";
+                                }
+                                onCallBack.onFail(msg);
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> paramsFinal = new HashMap<>();
+                        if (Objects.requireNonNull(params) != null) {
+                            paramsFinal = params;
+                        }
+                        return paramsFinal;
+                    }
+
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> headersFinal = new HashMap<>();
+                        if (Objects.requireNonNull(headers) != null) {
+                            headersFinal = headers;
+                        }
+                        return headersFinal;
+                    }
+                };
+
+                stringRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
+            } else {
+                NetworkUtility.Toast(context, "Please check your internet connection");
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 
     public interface GetResponse {
-        void onSuccess(String result) throws JSONException;
+        void onSuccess(String status_code, JSONObject result) throws JSONException;
 
         void onFail(String msg);
     }

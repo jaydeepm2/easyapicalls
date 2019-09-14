@@ -5,7 +5,10 @@ import android.content.Context;
 import java.util.Map;
 
 public interface RequestApp {
-    RequestApp init(Context context);
+    RequestApp setStatusHandler(String StatusKeyName, Map<String, String> status_codes);
+
+    RequestApp showProgressDialog(boolean showProgressDialog);
+    RequestApp setProgressMessage(String progressMessage);
     RequestApp setUrl(String url);
     RequestApp setType(int type);
     RequestApp setParams(Map<String, String> params);

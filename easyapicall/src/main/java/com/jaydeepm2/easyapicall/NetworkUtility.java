@@ -3,6 +3,7 @@ package com.jaydeepm2.easyapicall;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.widget.Toast;
 
 import java.util.Objects;
@@ -27,12 +28,13 @@ public class NetworkUtility {
     }
     /*ToDo: Check network state */
     public static boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Objects.requireNonNull(connectivityManager).getActiveNetworkInfo() != null){
-            return true;
-        }
-        else {
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            boolean isConnect = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            return isConnect;
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
