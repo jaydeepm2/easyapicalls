@@ -5,32 +5,35 @@ import android.content.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class EasyApiCalls implements RequestApp{
+import static com.jaydeepm2.easyapicall.RequestTypes.POST;
 
+public class AuthApiCall implements RequestApp {
     private static Context context;
     private String url;
     private int methodType;
     private Map<String, String> params;
     private Map<String, String> headers;
 
-    private String StatusKeyName,success_value;
+    private String StatusKeyName, success_value;
     private boolean showProgressDialog;
     private String progressMessage;
 
 
-    public static EasyApiCalls init(Context context){
-        EasyApiCalls.context = context;
-        return new EasyApiCalls(context);
+    public static AuthApiCall init(Context context){
+        AuthApiCall.context = context;
+        return new AuthApiCall(context);
     }
 
-    public EasyApiCalls(Context context) {
+    public AuthApiCall(Context context) {
         this.url = null;
         this.methodType = RequestTypes.GET;
         this.params = null;
         this.headers = null;
         this.StatusKeyName = null;
+        this.success_value = null;
         this.showProgressDialog = false;
         this.progressMessage = "";
     }
@@ -83,7 +86,7 @@ public class EasyApiCalls implements RequestApp{
     @Override
     public void makeRequest(final NetworkRequest.GetResponse onCallBack) {
 
-        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, this.methodType, this.StatusKeyName, this.success_value, new NetworkRequest.GetResponse() {
+        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, POST, this.StatusKeyName, this.success_value, new NetworkRequest.GetResponse() {
             @Override
             public void onSuccess(String status_code, JSONObject result) throws JSONException {
 

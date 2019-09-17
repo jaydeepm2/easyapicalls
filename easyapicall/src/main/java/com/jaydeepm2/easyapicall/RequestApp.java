@@ -5,7 +5,7 @@ import android.content.Context;
 import java.util.Map;
 
 public interface RequestApp {
-    RequestApp setStatusHandler(String StatusKeyName, Map<String, String> status_codes);
+    RequestApp setStatusHandler(String StatusKeyName, String success_value);
 
     RequestApp showProgressDialog(boolean showProgressDialog);
     RequestApp setProgressMessage(String progressMessage);

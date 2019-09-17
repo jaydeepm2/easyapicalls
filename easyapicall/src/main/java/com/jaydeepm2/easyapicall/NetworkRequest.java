@@ -21,11 +21,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_STATUS_FAILURE;
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_STATUS_SUCCESS;
+
 public class NetworkRequest {
 
 
 
-    public static void Request(final Context context, final boolean showProgressDialog, String progressMessage, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final String StatusKeyName, final Map<String, String> status_codes, final GetResponse onCallBack) {
+    public static void Request(final Context context, final boolean showProgressDialog, String progressMessage, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final String StatusKeyName, final String success_value, final GetResponse onCallBack) {
 
         try {
             if (NetworkUtility.isNetworkAvailable(context)) {
@@ -44,18 +47,25 @@ public class NetworkRequest {
 
                         try {
                             JSONObject obj = new JSONObject(response);
-                            Iterator it = status_codes.entrySet().iterator();
-                            String return_status_code = null;
-                            while (it.hasNext()) {
-                                Map.Entry pair = (Map.Entry) it.next();
-                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
-                                    return_status_code = pair.getValue().toString();
-                                    break;
-                                }
+//                            Iterator it = status_codes.entrySet().iterator();
+                            String return_status_code = EASYAPI_STATUS_FAILURE;
+                            if (obj.getString(StatusKeyName).equals(success_value)){
+                                return_status_code = EASYAPI_STATUS_SUCCESS;
                             }
+//                            while (it.hasNext()) {
+//                                Map.Entry pair = (Map.Entry) it.next();
+//                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
+//                                    return_status_code = pair.getValue().toString();
+//                                    break;
+//                                }
+//                            }
                             onCallBack.onSuccess(return_status_code, obj);
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            try {
+                                onCallBack.onSuccess(EASYAPI_STATUS_FAILURE, new JSONObject());
+                            }
+                            catch (Exception e2){}
                         }
                     }
                 },
@@ -88,8 +98,13 @@ public class NetworkRequest {
                     @Override
                     protected Map<String, String> getParams() throws AuthFailureError {
                         Map<String, String> paramsFinal = new HashMap<>();
-                        if (Objects.requireNonNull(params) != null) {
-                            paramsFinal = params;
+                        paramsFinal.put("EASYAPI", "");
+                        try {
+                            if (Objects.requireNonNull(params) != null) {
+                                paramsFinal = params;
+                            }
+                        }
+                        catch (Exception e){
                         }
                         return paramsFinal;
                     }
@@ -97,9 +112,13 @@ public class NetworkRequest {
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         Map<String, String> headersFinal = new HashMap<>();
-                        if (Objects.requireNonNull(headers) != null) {
-                            headersFinal = headers;
+                        headersFinal.put("EASYAPIH", "");
+                        try {
+                            if (Objects.requireNonNull(headers) != null) {
+                                headersFinal = headers;
+                            }
                         }
+                        catch (Exception e){}
                         return headersFinal;
                     }
                 };
