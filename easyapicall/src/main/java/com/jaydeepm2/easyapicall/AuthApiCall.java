@@ -94,9 +94,9 @@ public class AuthApiCall implements RequestApp {
             }
 
             @Override
-            public void onFail(String msg) {
+            public void onFail(String error_code, String error_body) {
 
-                onCallBack.onFail(msg);
+                onCallBack.onFail(error_code, error_body);
 
             }
         });

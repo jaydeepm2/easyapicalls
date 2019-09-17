@@ -16,13 +16,19 @@ import com.android.volley.toolbox.StringRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_AUTH_FAIL_ERROR;
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_DATA_ERROR;
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_NETWORK_ERROR;
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_SERVER_ERROR;
 import static com.jaydeepm2.easyapicall.Constants.EASYAPI_STATUS_FAILURE;
 import static com.jaydeepm2.easyapicall.Constants.EASYAPI_STATUS_SUCCESS;
+import static com.jaydeepm2.easyapicall.Constants.EASYAPI_TIMEOUT_ERROR;
 
 public class NetworkRequest {
 
@@ -76,23 +82,36 @@ public class NetworkRequest {
                                 if (showProgressDialog) {
                                     NetworkUtility.HideLoading();
                                 }
-                                String msg = "";
+                                String error_code = "";
                                 if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                                    msg = "Timeout or No Connection Error.";
+                                    error_code = EASYAPI_TIMEOUT_ERROR;
                                 } else if (error instanceof AuthFailureError) {
                                     //TODO
-                                    msg = "Authentication Failure Error.";
+                                    error_code = EASYAPI_AUTH_FAIL_ERROR;
                                 } else if (error instanceof ServerError) {
                                     //TODO
-                                    msg = "Server Error.";
+                                    error_code = EASYAPI_SERVER_ERROR;
                                 } else if (error instanceof NetworkError) {
                                     //TODO
-                                    msg = "Network Error.";
+                                    error_code = EASYAPI_NETWORK_ERROR;
                                 } else if (error instanceof ParseError) {
                                     //TODO
-                                    msg = "Data Error.";
+                                    error_code = EASYAPI_DATA_ERROR;
                                 }
-                                onCallBack.onFail(msg);
+
+                                String body = null;
+                                //get status code here
+                                String statusCode = String.valueOf(error.networkResponse.statusCode);
+                                //get response body and parse with appropriate encoding
+                                if(error.networkResponse.data!=null) {
+                                    try {
+                                        body = new String(error.networkResponse.data,"UTF-8");
+                                    } catch (UnsupportedEncodingException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                onCallBack.onFail(error_code, body);
                             }
                         }) {
                     @Override
@@ -137,7 +156,7 @@ public class NetworkRequest {
     public interface GetResponse {
         void onSuccess(String status_code, JSONObject result) throws JSONException;
 
-        void onFail(String msg);
+        void onFail(String error_id, String error_body);
     }
 
 }
