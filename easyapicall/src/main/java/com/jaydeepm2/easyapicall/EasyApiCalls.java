@@ -1,10 +1,12 @@
 package com.jaydeepm2.easyapicall;
 
 import android.content.Context;
+import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class EasyApiCalls implements RequestApp{
@@ -19,9 +21,13 @@ public class EasyApiCalls implements RequestApp{
     private boolean showProgressDialog;
     private String progressMessage;
 
+    private boolean isMultipartRequest;
+    private Map<String, Uri> fileParams;
+
 
     public static EasyApiCalls init(Context context){
         EasyApiCalls.context = context;
+        NetworkUtility.requestMultiplePermissions(context);
         return new EasyApiCalls(context);
     }
 
@@ -33,6 +39,8 @@ public class EasyApiCalls implements RequestApp{
         this.StatusKeyName = null;
         this.showProgressDialog = false;
         this.progressMessage = "";
+        this.isMultipartRequest = false;
+        this.fileParams = null;
     }
 
     @Override
@@ -79,11 +87,22 @@ public class EasyApiCalls implements RequestApp{
         return this;
     }
 
+    @Override
+    public RequestApp setMultipartRequest(boolean multipartRequest) {
+        isMultipartRequest = multipartRequest;
+        return this;
+    }
+
+    @Override
+    public RequestApp setFiles(Map<String, Uri> fileParams) {
+        this.fileParams = fileParams;
+        return this;
+    }
 
     @Override
     public void makeRequest(final NetworkRequest.GetResponse onCallBack) {
 
-        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, this.methodType, this.StatusKeyName, this.success_value, new NetworkRequest.GetResponse() {
+        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, this.methodType, this.StatusKeyName, this.success_value, this.isMultipartRequest, this.fileParams, new NetworkRequest.GetResponse() {
             @Override
             public void onSuccess(String status_code, JSONObject result) throws JSONException {
 
