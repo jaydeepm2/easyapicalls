@@ -87,13 +87,11 @@ public class EasyApiCalls implements RequestApp{
         return this;
     }
 
-    @Override
     public RequestApp setMultipartRequest(boolean multipartRequest) {
         isMultipartRequest = multipartRequest;
         return this;
     }
 
-    @Override
     public RequestApp setFiles(Map<String, Uri> fileParams) {
         this.fileParams = fileParams;
         return this;

@@ -15,7 +15,5 @@ public interface RequestApp {
     RequestApp setType(int type);
     RequestApp setParams(Map<String, String> params);
     RequestApp setHeaders(Map<String, String> headers);
-    RequestApp setMultipartRequest(boolean multipartRequest);
-    RequestApp setFiles(Map<String, Uri> fileParams);
     void makeRequest(final NetworkRequest.GetResponse onCallBack);
 }
