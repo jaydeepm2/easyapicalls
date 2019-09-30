@@ -1,6 +1,7 @@
 package com.jaydeepm2.easyapicall;
 
 import android.content.Context;
+import android.net.Uri;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,6 +81,16 @@ public class AuthApiCall implements RequestApp {
     public RequestApp setHeaders(Map<String, String> headers) {
         this.headers = headers;
         return this;
+    }
+
+    @Override
+    public RequestApp setMultipartRequest(boolean multipartRequest) {
+        return null;
+    }
+
+    @Override
+    public RequestApp setFiles(Map<String, Uri> fileParams) {
+        return null;
     }
 
 
