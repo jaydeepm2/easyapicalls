@@ -158,6 +158,7 @@ public class NetworkRequest {
                             Map<String, DataPart> fParams = new HashMap<>();
                             try {
                                 for (Map.Entry<String,Uri> entry : fileParams.entrySet()){
+                                    Log.i("JAY FILES", entry.getValue()+"");
                                     long imagename = System.currentTimeMillis();
                                     byte[] dataPart = NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()));
                                     fParams.put(entry.getKey(), new DataPart(imagename + ".png", dataPart));
