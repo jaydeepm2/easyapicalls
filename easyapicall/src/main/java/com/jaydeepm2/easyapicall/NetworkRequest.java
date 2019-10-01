@@ -49,7 +49,7 @@ public class NetworkRequest {
                     NetworkUtility.OpenLoadingDialog(context, progressMessage);
                 }
 
-                Log.i("JAY EASY N", String.valueOf(isMultipartRequest));
+                Log.i("JAY EASY N", isMultipartRequest==true ? "1" : "0");
                 if (isMultipartRequest) {
                     MultipartRequest multipartRequest = new MultipartRequest(RequestTypes.POST, url, new Response.Listener<NetworkResponse>() {
                         @Override
