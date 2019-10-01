@@ -88,7 +88,7 @@ public class EasyApiCalls implements RequestApp{
     }
 
     public RequestApp setMultipartRequest(boolean multipartRequest) {
-        isMultipartRequest = multipartRequest;
+        this.isMultipartRequest = multipartRequest;
         return this;
     }
 

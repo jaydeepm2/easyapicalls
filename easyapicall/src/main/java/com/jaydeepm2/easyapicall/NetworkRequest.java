@@ -49,6 +49,7 @@ public class NetworkRequest {
                     NetworkUtility.OpenLoadingDialog(context, progressMessage);
                 }
 
+                Log.i("JAY EASY N", String.valueOf(isMultipartRequest));
                 if (isMultipartRequest) {
                     MultipartRequest multipartRequest = new MultipartRequest(RequestTypes.POST, url, new Response.Listener<NetworkResponse>() {
                         @Override
@@ -159,7 +160,6 @@ public class NetworkRequest {
                                 for (Map.Entry<String,Uri> entry : fileParams.entrySet()){
                                     long imagename = System.currentTimeMillis();
                                     byte[] dataPart = NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()));
-                                    Log.i("JAY EASY F", dataPart.toString());
                                     fParams.put(entry.getKey(), new DataPart(imagename + ".png", dataPart));
                                 }
                             }
