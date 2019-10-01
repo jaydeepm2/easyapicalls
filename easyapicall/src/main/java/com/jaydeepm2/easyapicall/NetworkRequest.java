@@ -3,6 +3,7 @@ package com.jaydeepm2.easyapicall;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -157,7 +158,9 @@ public class NetworkRequest {
                             try {
                                 for (Map.Entry<String,Uri> entry : fileParams.entrySet()){
                                     long imagename = System.currentTimeMillis();
-                                    fParams.put(entry.getKey(), new DataPart(imagename + ".png", NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()))));
+                                    byte[] dataPart = NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()));
+                                    Log.i("JAY EASY F", dataPart.toString());
+                                    fParams.put(entry.getKey(), new DataPart(imagename + ".png", dataPart));
                                 }
                             }
                             catch (Exception e){
