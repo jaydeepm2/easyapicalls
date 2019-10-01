@@ -49,8 +49,8 @@ public class NetworkRequest {
                     NetworkUtility.OpenLoadingDialog(context, progressMessage);
                 }
 
-                Log.i("JAY EASY N", isMultipartRequest==true ? "1" : "0");
                 if (isMultipartRequest) {
+                Log.i("JAY EASY N", "1");
                     MultipartRequest multipartRequest = new MultipartRequest(RequestTypes.POST, url, new Response.Listener<NetworkResponse>() {
                         @Override
                         public void onResponse(NetworkResponse response1) {
@@ -173,7 +173,7 @@ public class NetworkRequest {
                     VolleySingleton.getInstance(context).addToRequestQueue(multipartRequest);
                 }
                 else{
-
+                Log.i("JAY EASY N", "0");
                     StringRequest stringRequest = new StringRequest(methodType, url, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
