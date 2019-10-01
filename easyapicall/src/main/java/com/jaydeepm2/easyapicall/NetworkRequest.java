@@ -155,9 +155,9 @@ public class NetworkRequest {
                         protected Map<String, DataPart> getByteData() {
                             Map<String, DataPart> fParams = new HashMap<>();
                             try {
-                                for (int x = 0; x < fileParams.size(); x++) {
+                                for (Map.Entry<String,Uri> entry : fileParams.entrySet()){
                                     long imagename = System.currentTimeMillis();
-                                    fParams.put("image", new DataPart(imagename + ".png", NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), fileParams.get(x)))));
+                                    fParams.put(entry.getKey(), new DataPart(imagename + ".png", NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()))));
                                 }
                             }
                             catch (Exception e){
