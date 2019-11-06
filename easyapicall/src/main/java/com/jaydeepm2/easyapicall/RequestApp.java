@@ -3,6 +3,8 @@ package com.jaydeepm2.easyapicall;
 import android.content.Context;
 import android.net.Uri;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -17,5 +19,7 @@ public interface RequestApp {
     RequestApp setHeaders(Map<String, String> headers);
     RequestApp setMultipartRequest(boolean multipartRequest);
     RequestApp setFiles(Map<String, Uri> fileParams);
+    RequestApp setJsonData(JSONObject jsonData);
+    RequestApp setJsonRequest(boolean isJsonRequest);
     void makeRequest(final NetworkRequest.GetResponse onCallBack);
 }

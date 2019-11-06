@@ -93,11 +93,20 @@ public class AuthApiCall implements RequestApp {
         return null;
     }
 
+    @Override
+    public RequestApp setJsonData(JSONObject jsonData) {
+        return null;
+    }
+
+    @Override
+    public RequestApp setJsonRequest(boolean isJsonRequest) {
+        return null;
+    }
 
     @Override
     public void makeRequest(final NetworkRequest.GetResponse onCallBack) {
 
-        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, POST, this.StatusKeyName, this.success_value, false, null, new NetworkRequest.GetResponse() {
+        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, POST, this.StatusKeyName, this.success_value, false, null, false, null,  new NetworkRequest.GetResponse() {
             @Override
             public void onSuccess(String status_code, JSONObject result) throws JSONException {
 

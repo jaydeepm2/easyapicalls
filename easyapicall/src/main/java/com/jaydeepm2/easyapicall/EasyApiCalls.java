@@ -16,6 +16,8 @@ public class EasyApiCalls implements RequestApp{
     private int methodType;
     private Map<String, String> params;
     private Map<String, String> headers;
+    private boolean isJsonRequest;
+    private JSONObject jsonData;
 
     private String StatusKeyName,success_value;
     private boolean showProgressDialog;
@@ -41,6 +43,8 @@ public class EasyApiCalls implements RequestApp{
         this.progressMessage = "";
         this.isMultipartRequest = false;
         this.fileParams = null;
+        this.isJsonRequest = false;
+        this.jsonData = null;
     }
 
     @Override
@@ -87,20 +91,34 @@ public class EasyApiCalls implements RequestApp{
         return this;
     }
 
+    @Override
     public RequestApp setMultipartRequest(boolean multipartRequest) {
         this.isMultipartRequest = multipartRequest;
         return this;
     }
 
+    @Override
     public RequestApp setFiles(Map<String, Uri> fileParams) {
         this.fileParams = fileParams;
         return this;
     }
 
     @Override
+    public RequestApp setJsonData(JSONObject jsonData) {
+        this.jsonData = jsonData;
+        return this;
+    }
+
+    @Override
+    public RequestApp setJsonRequest(boolean isJsonRequest) {
+        this.isJsonRequest = isJsonRequest;
+        return this;
+    }
+
+    @Override
     public void makeRequest(final NetworkRequest.GetResponse onCallBack) {
 
-        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, this.methodType, this.StatusKeyName, this.success_value, this.isMultipartRequest, this.fileParams, new NetworkRequest.GetResponse() {
+        NetworkRequest.Request(this.context, this.showProgressDialog, this.progressMessage, this.url, this.params, this.headers, this.methodType, this.StatusKeyName, this.success_value, this.isMultipartRequest, this.fileParams, this.isJsonRequest, this.jsonData, new NetworkRequest.GetResponse() {
             @Override
             public void onSuccess(String status_code, JSONObject result) throws JSONException {
 

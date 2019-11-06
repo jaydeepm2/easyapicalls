@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
@@ -40,7 +41,7 @@ public class NetworkRequest {
 
 
 
-    public static void Request(final Context context, final boolean showProgressDialog, String progressMessage, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final String StatusKeyName, final String success_value, boolean isMultipartRequest, final Map<String, Uri> fileParams, final GetResponse onCallBack) {
+    public static void Request(final Context context, final boolean showProgressDialog, String progressMessage, String url, final Map<String, String> params, final Map<String, String> headers, int methodType, final String StatusKeyName, final String success_value, boolean isMultipartRequest, final Map<String, Uri> fileParams, final boolean isJsonRequest, final JSONObject jsonData, final GetResponse onCallBack) {
 
         try {
             if (NetworkUtility.isNetworkAvailable(context)) {
@@ -50,140 +51,18 @@ public class NetworkRequest {
                 }
 
                 Log.i("JAY EASY N", String.valueOf(isMultipartRequest));
-                if (isMultipartRequest) {
-                    MultipartRequest multipartRequest = new MultipartRequest(RequestTypes.POST, url, new Response.Listener<NetworkResponse>() {
+
+                if (isJsonRequest){
+                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(methodType, url, jsonData, new Response.Listener<JSONObject>() {
                         @Override
-                        public void onResponse(NetworkResponse response1) {
+                        public void onResponse(JSONObject response) {
 
                             if (showProgressDialog) {
                                 NetworkUtility.HideLoading();
                             }
 
                             try {
-                                String response = new String(response1.data, "UTF-8");
-                                JSONObject obj = new JSONObject(response);
-//                            Iterator it = status_codes.entrySet().iterator();
-                                String return_status_code = EASYAPI_STATUS_FAILURE;
-                                if (obj.getString(StatusKeyName).equals(success_value)) {
-                                    return_status_code = EASYAPI_STATUS_SUCCESS;
-                                }
-//                            while (it.hasNext()) {
-//                                Map.Entry pair = (Map.Entry) it.next();
-//                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
-//                                    return_status_code = pair.getValue().toString();
-//                                    break;
-//                                }
-//                            }
-                                onCallBack.onSuccess(return_status_code, obj);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                try {
-                                    onCallBack.onSuccess(EASYAPI_STATUS_FAILURE, new JSONObject());
-                                } catch (Exception e2) {
-                                }
-                            }
-
-                        }
-                    },
-                            new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                    if (showProgressDialog) {
-                                        NetworkUtility.HideLoading();
-                                    }
-                                    String error_code = "";
-                                    if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                                        error_code = EASYAPI_TIMEOUT_ERROR;
-                                    } else if (error instanceof AuthFailureError) {
-                                        //TODO
-                                        error_code = EASYAPI_AUTH_FAIL_ERROR;
-                                    } else if (error instanceof ServerError) {
-                                        //TODO
-                                        error_code = EASYAPI_SERVER_ERROR;
-                                    } else if (error instanceof NetworkError) {
-                                        //TODO
-                                        error_code = EASYAPI_NETWORK_ERROR;
-                                    } else if (error instanceof ParseError) {
-                                        //TODO
-                                        error_code = EASYAPI_DATA_ERROR;
-                                    }
-
-                                    String body = null;
-                                    //get status code here
-                                    String statusCode = String.valueOf(error.networkResponse.statusCode);
-                                    //get response body and parse with appropriate encoding
-                                    if (error.networkResponse.data != null) {
-                                        try {
-                                            body = new String(error.networkResponse.data, "UTF-8");
-                                        } catch (UnsupportedEncodingException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    onCallBack.onFail(error_code, body);
-                                }
-                            }
-                    ){
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            Map<String, String> paramsFinal = new HashMap<>();
-                            paramsFinal.put("EASYAPI", "");
-                            try {
-                                if (Objects.requireNonNull(params) != null) {
-                                    paramsFinal = params;
-                                }
-                            } catch (Exception e) {
-                            }
-                            return paramsFinal;
-                        }
-
-                        @Override
-                        public Map<String, String> getHeaders() throws AuthFailureError {
-                            Map<String, String> headersFinal = new HashMap<>();
-                            headersFinal.put("EASYAPIH", "");
-                            try {
-                                if (Objects.requireNonNull(headers) != null) {
-                                    headersFinal = headers;
-                                }
-                            } catch (Exception e) {
-                            }
-                            return headersFinal;
-                        }
-                        /*
-                         *pass files using below method
-                         * */
-                        @Override
-                        protected Map<String, DataPart> getByteData() {
-                            Map<String, DataPart> fParams = new HashMap<>();
-                            try {
-                                for (Map.Entry<String,Uri> entry : fileParams.entrySet()){
-                                    long imagename = System.currentTimeMillis();
-                                    byte[] dataPart = NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()));
-                                    fParams.put(entry.getKey(), new DataPart(imagename + ".png", dataPart));
-                                }
-                            }
-                            catch (Exception e){
-                            }
-                            return fParams;
-                        }
-                    };
-
-                    multipartRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    VolleySingleton.getInstance(context).addToRequestQueue(multipartRequest);
-                }
-                else{
-
-                    StringRequest stringRequest = new StringRequest(methodType, url, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
-                            if (showProgressDialog) {
-                                NetworkUtility.HideLoading();
-                            }
-
-                            try {
-                                JSONObject obj = new JSONObject(response);
+                                JSONObject obj = response;
 //                            Iterator it = status_codes.entrySet().iterator();
                                 String return_status_code = EASYAPI_STATUS_FAILURE;
                                 if (obj.getString(StatusKeyName).equals(success_value)) {
@@ -205,59 +84,46 @@ public class NetworkRequest {
                                 }
                             }
                         }
-                    },
-                            new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-
-                                    if (showProgressDialog) {
-                                        NetworkUtility.HideLoading();
-                                    }
-                                    String error_code = "";
-                                    if (error instanceof TimeoutError || error instanceof NoConnectionError) {
-                                        error_code = EASYAPI_TIMEOUT_ERROR;
-                                    } else if (error instanceof AuthFailureError) {
-                                        //TODO
-                                        error_code = EASYAPI_AUTH_FAIL_ERROR;
-                                    } else if (error instanceof ServerError) {
-                                        //TODO
-                                        error_code = EASYAPI_SERVER_ERROR;
-                                    } else if (error instanceof NetworkError) {
-                                        //TODO
-                                        error_code = EASYAPI_NETWORK_ERROR;
-                                    } else if (error instanceof ParseError) {
-                                        //TODO
-                                        error_code = EASYAPI_DATA_ERROR;
-                                    }
-
-                                    String body = null;
-                                    //get status code here
-                                    String statusCode = String.valueOf(error.networkResponse.statusCode);
-                                    //get response body and parse with appropriate encoding
-                                    if (error.networkResponse.data != null) {
-                                        try {
-                                            body = new String(error.networkResponse.data, "UTF-8");
-                                        } catch (UnsupportedEncodingException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-
-                                    onCallBack.onFail(error_code, body);
-                                }
-                            }) {
+                    }, new Response.ErrorListener() {
                         @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-                            Map<String, String> paramsFinal = new HashMap<>();
-                            paramsFinal.put("EASYAPI", "");
-                            try {
-                                if (Objects.requireNonNull(params) != null) {
-                                    paramsFinal = params;
-                                }
-                            } catch (Exception e) {
-                            }
-                            return paramsFinal;
-                        }
+                        public void onErrorResponse(VolleyError error) {
 
+                            if (showProgressDialog) {
+                                NetworkUtility.HideLoading();
+                            }
+                            String error_code = "";
+                            if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                                error_code = EASYAPI_TIMEOUT_ERROR;
+                            } else if (error instanceof AuthFailureError) {
+                                //TODO
+                                error_code = EASYAPI_AUTH_FAIL_ERROR;
+                            } else if (error instanceof ServerError) {
+                                //TODO
+                                error_code = EASYAPI_SERVER_ERROR;
+                            } else if (error instanceof NetworkError) {
+                                //TODO
+                                error_code = EASYAPI_NETWORK_ERROR;
+                            } else if (error instanceof ParseError) {
+                                //TODO
+                                error_code = EASYAPI_DATA_ERROR;
+                            }
+
+                            String body = null;
+                            //get status code here
+                            String statusCode = String.valueOf(error.networkResponse.statusCode);
+                            //get response body and parse with appropriate encoding
+                            if (error.networkResponse.data != null) {
+                                try {
+                                    body = new String(error.networkResponse.data, "UTF-8");
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            onCallBack.onFail(error_code, body);
+                        }
+                    })
+                    {
                         @Override
                         public Map<String, String> getHeaders() throws AuthFailureError {
                             Map<String, String> headersFinal = new HashMap<>();
@@ -268,12 +134,241 @@ public class NetworkRequest {
                                 }
                             } catch (Exception e) {
                             }
+                            headersFinal.put("Content-Type", "application/json; charset=utf-8");
                             return headersFinal;
                         }
                     };
 
-                    stringRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                    VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
+                    jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    VolleySingleton.getInstance(context).addToRequestQueue(jsonObjectRequest);
+                }
+                else {
+                    if (isMultipartRequest) {
+                        MultipartRequest multipartRequest = new MultipartRequest(RequestTypes.POST, url, new Response.Listener<NetworkResponse>() {
+                            @Override
+                            public void onResponse(NetworkResponse response1) {
+
+                                if (showProgressDialog) {
+                                    NetworkUtility.HideLoading();
+                                }
+
+                                try {
+                                    String response = new String(response1.data, "UTF-8");
+                                    JSONObject obj = new JSONObject(response);
+//                            Iterator it = status_codes.entrySet().iterator();
+                                    String return_status_code = EASYAPI_STATUS_FAILURE;
+                                    if (obj.getString(StatusKeyName).equals(success_value)) {
+                                        return_status_code = EASYAPI_STATUS_SUCCESS;
+                                    }
+//                            while (it.hasNext()) {
+//                                Map.Entry pair = (Map.Entry) it.next();
+//                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
+//                                    return_status_code = pair.getValue().toString();
+//                                    break;
+//                                }
+//                            }
+                                    onCallBack.onSuccess(return_status_code, obj);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    try {
+                                        onCallBack.onSuccess(EASYAPI_STATUS_FAILURE, new JSONObject());
+                                    } catch (Exception e2) {
+                                    }
+                                }
+
+                            }
+                        },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+
+                                        if (showProgressDialog) {
+                                            NetworkUtility.HideLoading();
+                                        }
+                                        String error_code = "";
+                                        if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                                            error_code = EASYAPI_TIMEOUT_ERROR;
+                                        } else if (error instanceof AuthFailureError) {
+                                            //TODO
+                                            error_code = EASYAPI_AUTH_FAIL_ERROR;
+                                        } else if (error instanceof ServerError) {
+                                            //TODO
+                                            error_code = EASYAPI_SERVER_ERROR;
+                                        } else if (error instanceof NetworkError) {
+                                            //TODO
+                                            error_code = EASYAPI_NETWORK_ERROR;
+                                        } else if (error instanceof ParseError) {
+                                            //TODO
+                                            error_code = EASYAPI_DATA_ERROR;
+                                        }
+
+                                        String body = null;
+                                        //get status code here
+                                        String statusCode = String.valueOf(error.networkResponse.statusCode);
+                                        //get response body and parse with appropriate encoding
+                                        if (error.networkResponse.data != null) {
+                                            try {
+                                                body = new String(error.networkResponse.data, "UTF-8");
+                                            } catch (UnsupportedEncodingException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        onCallBack.onFail(error_code, body);
+                                    }
+                                }
+                        ) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> paramsFinal = new HashMap<>();
+                                paramsFinal.put("EASYAPI", "");
+                                try {
+                                    if (Objects.requireNonNull(params) != null) {
+                                        paramsFinal = params;
+                                    }
+                                } catch (Exception e) {
+                                }
+                                return paramsFinal;
+                            }
+
+                            @Override
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String, String> headersFinal = new HashMap<>();
+                                headersFinal.put("EASYAPIH", "");
+                                try {
+                                    if (Objects.requireNonNull(headers) != null) {
+                                        headersFinal = headers;
+                                    }
+                                } catch (Exception e) {
+                                }
+                                return headersFinal;
+                            }
+
+                            /*
+                             *pass files using below method
+                             * */
+                            @Override
+                            protected Map<String, DataPart> getByteData() {
+                                Map<String, DataPart> fParams = new HashMap<>();
+                                try {
+                                    for (Map.Entry<String, Uri> entry : fileParams.entrySet()) {
+                                        long imagename = System.currentTimeMillis();
+                                        byte[] dataPart = NetworkUtility.getFileDataFromDrawable(MediaStore.Images.Media.getBitmap(context.getContentResolver(), entry.getValue()));
+                                        fParams.put(entry.getKey(), new DataPart(imagename + ".png", dataPart));
+                                    }
+                                } catch (Exception e) {
+                                }
+                                return fParams;
+                            }
+                        };
+
+                        multipartRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                        VolleySingleton.getInstance(context).addToRequestQueue(multipartRequest);
+                    }
+                    else {
+
+                        StringRequest stringRequest = new StringRequest(methodType, url, new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+
+                                if (showProgressDialog) {
+                                    NetworkUtility.HideLoading();
+                                }
+
+                                try {
+                                    JSONObject obj = new JSONObject(response);
+//                            Iterator it = status_codes.entrySet().iterator();
+                                    String return_status_code = EASYAPI_STATUS_FAILURE;
+                                    if (obj.getString(StatusKeyName).equals(success_value)) {
+                                        return_status_code = EASYAPI_STATUS_SUCCESS;
+                                    }
+//                            while (it.hasNext()) {
+//                                Map.Entry pair = (Map.Entry) it.next();
+//                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
+//                                    return_status_code = pair.getValue().toString();
+//                                    break;
+//                                }
+//                            }
+                                    onCallBack.onSuccess(return_status_code, obj);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    try {
+                                        onCallBack.onSuccess(EASYAPI_STATUS_FAILURE, new JSONObject());
+                                    } catch (Exception e2) {
+                                    }
+                                }
+                            }
+                        },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+
+                                        if (showProgressDialog) {
+                                            NetworkUtility.HideLoading();
+                                        }
+                                        String error_code = "";
+                                        if (error instanceof TimeoutError || error instanceof NoConnectionError) {
+                                            error_code = EASYAPI_TIMEOUT_ERROR;
+                                        } else if (error instanceof AuthFailureError) {
+                                            //TODO
+                                            error_code = EASYAPI_AUTH_FAIL_ERROR;
+                                        } else if (error instanceof ServerError) {
+                                            //TODO
+                                            error_code = EASYAPI_SERVER_ERROR;
+                                        } else if (error instanceof NetworkError) {
+                                            //TODO
+                                            error_code = EASYAPI_NETWORK_ERROR;
+                                        } else if (error instanceof ParseError) {
+                                            //TODO
+                                            error_code = EASYAPI_DATA_ERROR;
+                                        }
+
+                                        String body = null;
+                                        //get status code here
+                                        String statusCode = String.valueOf(error.networkResponse.statusCode);
+                                        //get response body and parse with appropriate encoding
+                                        if (error.networkResponse.data != null) {
+                                            try {
+                                                body = new String(error.networkResponse.data, "UTF-8");
+                                            } catch (UnsupportedEncodingException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        onCallBack.onFail(error_code, body);
+                                    }
+                                }) {
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> paramsFinal = new HashMap<>();
+                                paramsFinal.put("EASYAPI", "");
+                                try {
+                                    if (Objects.requireNonNull(params) != null) {
+                                        paramsFinal = params;
+                                    }
+                                } catch (Exception e) {
+                                }
+                                return paramsFinal;
+                            }
+
+                            @Override
+                            public Map<String, String> getHeaders() throws AuthFailureError {
+                                Map<String, String> headersFinal = new HashMap<>();
+                                headersFinal.put("EASYAPIH", "");
+                                try {
+                                    if (Objects.requireNonNull(headers) != null) {
+                                        headersFinal = headers;
+                                    }
+                                } catch (Exception e) {
+                                }
+                                return headersFinal;
+                            }
+                        };
+
+                        stringRequest.setRetryPolicy(new DefaultRetryPolicy(50000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                        VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
+                    }
+
                 }
 
             } else {
