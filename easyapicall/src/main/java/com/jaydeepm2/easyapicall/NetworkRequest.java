@@ -68,13 +68,7 @@ public class NetworkRequest {
                                 if (obj.getString(StatusKeyName).equals(success_value)) {
                                     return_status_code = EASYAPI_STATUS_SUCCESS;
                                 }
-//                            while (it.hasNext()) {
-//                                Map.Entry pair = (Map.Entry) it.next();
-//                                if (obj.getString(StatusKeyName).equals(pair.getValue().toString())) {
-//                                    return_status_code = pair.getValue().toString();
-//                                    break;
-//                                }
-//                            }
+
                                 onCallBack.onSuccess(return_status_code, obj);
                             } catch (JSONException e) {
                                 e.printStackTrace();
